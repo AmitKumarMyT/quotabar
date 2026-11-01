@@ -2,7 +2,7 @@ import AppKit
 import PacingCore
 
 final class MeterCardNSView: NSView {
-    let meterData: PersistedMeterData
+    let meterID: UUID
     var plan: DayPacingPlan
     let onSave: (Double, Double?, Date) -> Void
 
@@ -19,11 +19,11 @@ final class MeterCardNSView: NSView {
     private var entrySheet: InlineEntrySheet?
 
     init(
-        meterData: PersistedMeterData,
+        meterID: UUID,
         plan: DayPacingPlan,
         onSave: @escaping (Double, Double?, Date) -> Void
     ) {
-        self.meterData = meterData
+        self.meterID = meterID
         self.plan = plan
         self.onSave = onSave
         super.init(frame: NSRect(x: 0, y: 0, width: 290, height: 140))
@@ -36,7 +36,6 @@ final class MeterCardNSView: NSView {
         layer?.borderWidth = 1.0
 
         setupViews()
-        render()
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -61,11 +60,12 @@ final class MeterCardNSView: NSView {
         goalSubLabel.textColor = .secondaryLabelColor
         addSubview(goalSubLabel)
 
-        roomLeftLabel.frame = NSRect(x: 114, y: 66, width: 120, height: 16)
+        roomLeftLabel.frame = NSRect(x: 114, y: 66, width: 110, height: 16)
         roomLeftLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
         addSubview(roomLeftLabel)
 
-        updateButton.frame = NSRect(x: 224, y: 72, width: 54, height: 24)
+        // Make button width 64 to avoid "Updat" truncation
+        updateButton.frame = NSRect(x: 218, y: 72, width: 62, height: 24)
         updateButton.title = "Update"
         updateButton.bezelStyle = .rounded
         updateButton.controlSize = .small
@@ -87,8 +87,10 @@ final class MeterCardNSView: NSView {
         addSubview(guardLabel)
     }
 
-    func render() {
-        titleLabel.stringValue = meterData.config.name
+    func update(meter: PersistedMeterData, plan: DayPacingPlan) {
+        self.plan = plan
+
+        titleLabel.stringValue = meter.config.name
         statusLabel.stringValue = "\(plan.status.rawValue)"
         statusLabel.textColor = statusColor(for: plan.status)
 
@@ -110,11 +112,13 @@ final class MeterCardNSView: NSView {
     }
 
     @objc private func updateTapped() {
+        guard let currentMeter = QuotaStore.shared.meters.first(where: { $0.config.id == meterID }) else { return }
+
         let sheet = InlineEntrySheet(
-            meterConfig: meterData.config,
+            meterConfig: currentMeter.config,
             currentWeekly: Double(plan.currentUsed),
-            current5h: meterData.readings.last?.fiveHourPercentUsed,
-            currentReset: meterData.readings.last?.weeklyResetDate,
+            current5h: currentMeter.readings.last?.fiveHourPercentUsed,
+            currentReset: currentMeter.readings.last?.weeklyResetDate,
             onSave: { [weak self] weekly, fiveHour, resetDate in
                 self?.onSave(weekly, fiveHour, resetDate)
                 self?.entrySheet?.view.removeFromSuperview()

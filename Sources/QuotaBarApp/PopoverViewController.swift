@@ -54,16 +54,16 @@ final class PopoverViewController: NSViewController {
 
         for meter in store.meters {
             let plan = store.plan(for: meter)
-            let card = MeterCardNSView(meterData: meter, plan: plan) { [weak self] weekly, fiveHour, resetDate in
+            let card = MeterCardNSView(meterID: meter.config.id, plan: plan) { [weak self] weekly, fiveHour, resetDate in
                 self?.store.addReading(
                     for: meter.config.id,
                     weeklyPercent: weekly,
                     fiveHourPercent: fiveHour,
                     weeklyResetDate: resetDate
                 )
-                self?.refresh()
             }
             card.frame = NSRect(x: 15, y: currentY, width: 290, height: cardHeight)
+            card.update(meter: meter, plan: plan)
             effectView.addSubview(card)
             cardViews.append(card)
 
@@ -89,9 +89,10 @@ final class PopoverViewController: NSViewController {
 
     func refresh() {
         for card in cardViews {
-            let plan = store.plan(for: card.meterData)
-            card.plan = plan
-            card.render()
+            if let freshMeter = store.meters.first(where: { $0.config.id == card.meterID }) {
+                let freshPlan = store.plan(for: freshMeter)
+                card.update(meter: freshMeter, plan: freshPlan)
+            }
         }
         updateFooterTime()
     }
@@ -131,7 +132,6 @@ final class PopoverViewController: NSViewController {
                         )
                     }
                 }
-                self.refresh()
             }
         }
     }
