@@ -8,6 +8,10 @@
 		<data>
 		+heMJndFCV6XIMaMapclkUDiZvk=
 		</data>
+		<key>Resources/claude_statusline_hook.py</key>
+		<data>
+		wQUckHf29+edzDJ4E3D7fQQojsY=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -16,6 +20,13 @@
 			<key>hash2</key>
 			<data>
 			VzhqNT3/H60LAQ1mgnK0fZBXZDrHh25ivkZx2It8OJo=
+			</data>
+		</dict>
+		<key>Resources/claude_statusline_hook.py</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			aTt3dvi79ZN/+C4s7xcWRhJbfDzrAa1GbuhhKShaFXY=
 			</data>
 		</dict>
 	</dict>

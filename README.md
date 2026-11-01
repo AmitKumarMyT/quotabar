@@ -30,6 +30,7 @@ Clicking the label reveals a **native dark glass popover** with live capsule met
 ## ✨ Features
 
 - **Side-by-Side Monitoring**: Track Claude and Google Antigravity simultaneously.
+- **Official Claude Code Auto-Sync**: Automatically receives real-time rate limits, 5-hour usage, and weekly quota from Claude Code's native `statusLine` command feed. Zero typing required!
 - **Glanceable Menu Bar Label**: Displays remaining daily headroom in under a second (`C 13 · A 17`).
 - **Mathematical Daily Pacing Model**:
   - **Daily Budget**: $\lfloor \frac{\text{Remaining Weekly Quota}}{\text{Days Left}} \rfloor$
@@ -50,6 +51,25 @@ Clicking the label reveals a **native dark glass popover** with live capsule met
 - **Low Energy Footprint**:
   - Runs with `LSUIElement = true` (menu-bar only, no Dock icon).
   - Updates only on day boundaries, Mac wake events, or a light 15-minute timer. Zero continuous CPU polling.
+
+---
+
+## 🔄 Automatic Quota Sync
+
+### Claude Code (Official Native Sync)
+QuotaBar automatically connects to Claude Code's native `statusLine` hook. The installer configures this automatically in `~/.claude/settings.json`:
+```json
+"statusLine": {
+  "type": "command",
+  "command": "python3 /Applications/QuotaBar.app/Contents/Resources/claude_statusline_hook.py"
+}
+```
+Whenever you prompt Claude Code in your terminal or IDE, Claude sends rate-limit percentages to QuotaBar's local on-device feed, updating your menu bar numbers in real-time.
+
+### Google Antigravity (Pacing Sync)
+Google does not publish a background telemetry hook or public read-only quota API. QuotaBar protects your account standing (in accordance with Google's terms prohibiting third-party server intercepts or reverse engineering) by providing:
+- Fast 1-second inline card updates.
+- Automated rolling calendar counting of **days left** from your reset time so the daily budget and goal marks remain 100% mathematically accurate all week without repeated re-entry.
 
 ---
 

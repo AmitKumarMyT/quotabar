@@ -7,6 +7,7 @@ final class MenuBarController: NSObject {
     private let store: QuotaStore
     private var popoverVC: PopoverViewController?
     private var timer: Timer?
+    private var claudeWatcher: ClaudeFeedWatcher?
 
     init(store: QuotaStore) {
         self.store = store
@@ -23,6 +24,8 @@ final class MenuBarController: NSObject {
             }
         }
 
+        setupClaudeFeedWatcher()
+
         // 15-minute background timer
         timer = Timer.scheduledTimer(withTimeInterval: 15 * 60, repeats: true) { [weak self] _ in
             self?.store.refreshDaySnapshots()
@@ -35,6 +38,23 @@ final class MenuBarController: NSObject {
             name: NSWorkspace.didWakeNotification,
             object: nil
         )
+    }
+
+    private func setupClaudeFeedWatcher() {
+        claudeWatcher = ClaudeFeedWatcher()
+        claudeWatcher?.onFeedUpdated = { [weak self] payload in
+            guard let self = self else { return }
+            // Find Claude meter
+            if let claudeMeter = self.store.meters.first(where: { $0.config.provider == .claude }) {
+                let currentReset = payload.resetDate ?? claudeMeter.readings.last?.weeklyResetDate ?? Date().addingTimeInterval(4 * 86400)
+                self.store.addReading(
+                    for: claudeMeter.config.id,
+                    weeklyPercent: payload.weeklyPercentUsed,
+                    fiveHourPercent: payload.fiveHourPercentUsed,
+                    weeklyResetDate: currentReset
+                )
+            }
+        }
     }
 
     private func setupStatusButton() {
