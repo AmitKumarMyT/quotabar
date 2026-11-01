@@ -30,6 +30,7 @@ Clicking the label reveals a **native dark glass popover** with live capsule met
 ## ✨ Features
 
 - **Side-by-Side Monitoring**: Track Claude and Google Antigravity simultaneously.
+- **Native Vision Screenshot OCR**: Take a screenshot (`Cmd+Shift+4` or paste) of your Claude usage screen or Antigravity Models & Usage screen and click **"Scan Screenshot"**. QuotaBar uses Apple's native on-device Vision framework to extract weekly and 5-hour percentages and reset countdowns in under 200ms.
 - **Official Claude Code Auto-Sync**: Automatically receives real-time rate limits, 5-hour usage, and weekly quota from Claude Code's native `statusLine` command feed. Zero typing required!
 - **Glanceable Menu Bar Label**: Displays remaining daily headroom in under a second (`C 13 · A 17`).
 - **Mathematical Daily Pacing Model**:

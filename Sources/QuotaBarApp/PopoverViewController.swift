@@ -37,8 +37,16 @@ final class PopoverViewController: NSViewController {
         // Header Title
         let headerLabel = NSTextField(labelWithString: "AI Quota Monitor")
         headerLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
-        headerLabel.frame = NSRect(x: 16, y: contentHeight - 30, width: 200, height: 20)
+        headerLabel.frame = NSRect(x: 16, y: contentHeight - 30, width: 140, height: 20)
         effectView.addSubview(headerLabel)
+
+        // "Scan Image" Button in Top Bar
+        let scanButton = NSButton(title: "Scan Screenshot", target: self, action: #selector(scanScreenshotTapped))
+        scanButton.bezelStyle = .rounded
+        scanButton.controlSize = .small
+        scanButton.font = NSFont.systemFont(ofSize: 10, weight: .medium)
+        scanButton.frame = NSRect(x: width - 125, y: contentHeight - 32, width: 110, height: 22)
+        effectView.addSubview(scanButton)
 
         // Stacked Cards
         cardViews.removeAll()
@@ -100,5 +108,31 @@ final class PopoverViewController: NSViewController {
 
     @objc private func quitApp() {
         NSApplication.shared.terminate(nil)
+    }
+
+    @objc private func scanScreenshotTapped() {
+        let openPanel = NSOpenPanel()
+        openPanel.title = "Select Usage Screenshot (Claude or Antigravity)"
+        openPanel.allowedContentTypes = [.png, .jpeg, .tiff]
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+
+        if openPanel.runModal() == .OK, let url = openPanel.url {
+            VisionUsageParser.shared.parseImage(at: url) { [weak self] results in
+                guard let self = self else { return }
+                for result in results {
+                    if let meter = self.store.meters.first(where: { $0.config.provider == result.provider }) {
+                        let reset = result.resetDate ?? meter.readings.last?.weeklyResetDate ?? Date().addingTimeInterval(4 * 86400)
+                        self.store.addReading(
+                            for: meter.config.id,
+                            weeklyPercent: result.weeklyPercentUsed,
+                            fiveHourPercent: result.fiveHourPercentUsed,
+                            weeklyResetDate: reset
+                        )
+                    }
+                }
+                self.refresh()
+            }
+        }
     }
 }
